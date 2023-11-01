@@ -4,6 +4,7 @@ Assignments, Atomic Project and Semester Project for course DPMS_AS/2203 - Intel
 
 ## Atomic Semester Project
 
+The atomic project has subject about Positive real functions and stability of LTI feedback systems.
 
 ## Team Semester Project
 
