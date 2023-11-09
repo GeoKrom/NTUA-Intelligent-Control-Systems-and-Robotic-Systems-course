@@ -10,7 +10,7 @@ syms z y k l
 
 
 %% Dynamical System
-x = 0.5:0.000001:2.5;
+x = 0.5:0.0000001:2.6;
 x_dot = -(x-1).*((x-2).^2);
 
 % Circle Parameters
@@ -32,4 +32,5 @@ plot(2,0,'ko','LineWidth',1);
 axis equal;
 grid minor;
 xlabel("$x$","Interpreter","latex","FontSize",16);
-ylabel("$\dot{x}$","Interpreter","latex","FontSize",16)
+ylabel("$\dot{x}$","Interpreter","latex","FontSize",16);
+ylim([-0.7 0.9]);
