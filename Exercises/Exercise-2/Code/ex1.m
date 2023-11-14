@@ -16,12 +16,12 @@ global r
 global gamma
 
 a = -5;
-w = 1;            % rad/sec
+w = 10;            % rad/sec
 zeta = 1;
 tspan = [0 50];
 n = 13;
 x0 = zeros(n,1);
-gamma = 55233242;
+gamma = 1;
 
 %% Simulation
 
