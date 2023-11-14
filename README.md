@@ -15,3 +15,5 @@ The team project consists of the construction and intelligent control of a multi
 [George Kassavetakis](https://github.com/Gkassavetakis)
 
 [George Krommydas](https://github.com/GeoKrom)
+
+[Lampis Papakostas](https://github.com/LPapakostas)
