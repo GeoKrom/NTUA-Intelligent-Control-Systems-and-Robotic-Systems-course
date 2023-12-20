@@ -17,7 +17,7 @@ function dstate = MRACStepper(t, state)
     r0 = 0.087266;
     
     % Parameter Uncertainties
-    per = 0.75;
+    per = 0.0;
     B_un = (B - B*per) + ((B + B*per) - (B - B*per))*rand(1);
     J_un = (J - J*per) + ((J + J*per) - (J - J*per))*rand(1);
     Km_un = (Km - Km*per) + ((Km + Km*per) - (Km - Km*per))*rand(1);
@@ -38,8 +38,8 @@ function dstate = MRACStepper(t, state)
     if (count == floor(period/3))
         r = r + r0;
         count = count + 1;
-    end
-    
+    end 
+
     % States
     state = state(:);
 
