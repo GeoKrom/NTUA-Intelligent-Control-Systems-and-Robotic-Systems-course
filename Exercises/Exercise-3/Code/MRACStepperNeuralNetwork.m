@@ -22,22 +22,23 @@ function dstate = MRACStepperNeuralNetwork(t,state)
     B_un = (B - B*per) + ((B + B*per) - (B - B*per))*rand(1);
     J_un = (J - J*per) + ((J + J*per) - (J - J*per))*rand(1);
     Km_un = (Km - Km*per) + ((Km + Km*per) - (Km - Km*per))*rand(1);
-    
+    sigma = 0.1;
+    mi = 0.5;
     % Plant State Space Matrices
     A = [0 1; 
          0 -B_un/J_un];
     b = [0; 
          Km_un/J_un];
     % Adaptation Gains
-    g3 = 1.5;
-    Gx = [2.5 0;
-          0 0.4];
-    Gtheta = [.4 0 0 0 0;
-              0 .5 0 0 0;
-              0 0 .85 0 0;
-              0 0 0 1 0;
-              0 0 0 0 .3];
-    
+    g3 = 0.5;
+    Gx = [0.6 0;
+          0 3];
+    % Gtheta = [5 0 0 0 0;
+    %           0 3 0 0 0;
+    %           0 0 2 0 0;
+    %           0 0 0 2 0;
+    %           0 0 0 0 1];
+    Gtheta = 1.5*eye(K);
     % Increment input signal
     if (count == floor(period/3))
         r = r + r0;
@@ -57,9 +58,9 @@ function dstate = MRACStepperNeuralNetwork(t,state)
     % Estimated Error
     e = x - x_m;
     % disp("Calcuted Error");
-    hidden_layer_out = (net.LayerWeights{1})*x(1) + net.LayerBiases{1};
+    hidden_layer_out = (net.LayerWeights{1,1})*x(1) + net.LayerBiases{1,1};
     for i = 1:K
-        phi(i,:) = gaussmf(hidden_layer_out(i),[0.2, 0.5]);
+        phi(i,:) = gaussmf(hidden_layer_out(i), [sigma, mi]);
     end
    
     % Simulation of the system
@@ -74,10 +75,9 @@ function dstate = MRACStepperNeuralNetwork(t,state)
     % dKx = -Gx*x*e'*P*b;
     % dKr = -g3*r*e'*P*b; 
     % dKtheta = -Gtheta*phi*e'*P*b;
-    dKx = Gx*Proj(Kx_est, -x*e'*P*b, 2, 1e-3);
-    dKr = g3*Proj(Kr_est, -r*e'*P*b, 5, 1e-3);
-    dKtheta = Gtheta*Proj(Ktheta_est, -phi*e'*P*b, 1, 1e-4);
-    
+    dKx = -Gx*Proj(Kx_est, x*e'*P*b, .1, 1e-5);
+    dKr = -g3*Proj(Kr_est, r*e'*P*b, .1, 1e-5);
+    dKtheta = -Gtheta*Proj(Ktheta_est, phi*e'*P*b, .01, 1e-4);
     dstate = [dx; dxm; dKx; dKr; dKtheta];
  
 end

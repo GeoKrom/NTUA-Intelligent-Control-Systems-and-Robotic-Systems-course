@@ -31,7 +31,7 @@ Q = eye(2);
 P = lyap(Am',Q);
 
 tstart = 0;
-tend = 50;
+tend = 60;
 tspan = [tstart,tend];
 n = 7;
 x0 = zeros(n,1);
@@ -46,9 +46,12 @@ T_L = 1e-3*((cos(2*theta)).^2).*sin(3*theta);
 
 disp("Training....");
 disp(" ")
-net = fitrnet(theta', T_L',"LayerSizes",K,"Activations","sigmoid");
+net = fitrnet(theta', T_L', "LayerSizes", K, "Activations", "sigmoid");
+iteration = net.TrainingHistory.Iteration;
+trainLosses = net.TrainingHistory.TrainingLoss;
 disp("Training stoped....");
 disp(" ")
+T_L_predict = predict(net, theta');
 %% Ode simulation 1
 % 
 % [t,x] = ode45(@MRACStepper, tspan, x0, opt);
@@ -135,7 +138,7 @@ x01 = zeros(n+K,1);
 [t1,x1] = ode45(@MRACStepperNeuralNetwork, tspan, x01, opt);
 
 K_theta_star = -24*(J/Km).*ones(size(t1));
-K_omega_star = (-10 + B/J)*(J/Km).*ones(size(t1));
+K_omega_star = (10 - B/J)*(J/Km).*ones(size(t1));
 K_theta_c_star = -K_theta_star;
 
 % Plots
@@ -211,6 +214,14 @@ legend('$\hat{K}_{\vartheta_c}$','$K_{\vartheta_c}^*$','Interpreter','latex',Loc
 
 figure(7);
 clf;
+% for i = 1:K
+%     subplot(K,2,i);
+%     plot(t1, x1(:, 8+i-1),'r-');
+%     xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+%     ylabel('$\Theta$','Interpreter','latex','FontSize',14);
+%     grid on;
+% end
+
 subplot(5,2,1);
 plot(t1, x1(:,8),'r-');
 xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
@@ -239,4 +250,18 @@ subplot(5,2,5.5);
 plot(t1, x1(:,12),'r-');
 xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
 ylabel('$\Theta_5$','Interpreter','latex','FontSize',14);
+grid on;
+
+% figure(8);
+% clf;
+% plot(iteration, trainLosses, 'r-');
+% xlabel('$epochs$','Interpreter','latex','FontSize',14);
+% ylabel('$MSE$','Interpreter','latex','FontSize',14);
+% grid on;
+% 
+figure(9);
+clf;
+plot(theta, T_L', 'b-', theta, T_L_predict,'r-');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$T_L (\vartheta) [Nm]$','Interpreter','latex','FontSize',14);
 grid on;
