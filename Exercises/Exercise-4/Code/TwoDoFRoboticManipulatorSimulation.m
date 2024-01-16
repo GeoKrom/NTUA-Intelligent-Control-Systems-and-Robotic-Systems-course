@@ -275,21 +275,3 @@ xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
 ylabel('$\pi_7$','Interpreter','latex','FontSize',14);
 grid on;
 legend('$\pi_7$', '$\pi_{7_d}$','Interpreter','latex',Location='southeast');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
