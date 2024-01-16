@@ -1,5 +1,5 @@
 function dstate = BacksteppingControl(t, state)
-%BACKSTEPPINGCONTROL Summary of this function goes here
+%  BACKSTEPPING CONTROL Summary of this function goes here
 %   Detailed explanation goes here
     global m1
     global l1

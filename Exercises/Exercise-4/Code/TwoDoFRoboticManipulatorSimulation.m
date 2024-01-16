@@ -47,83 +47,83 @@ parvar = [Iz1+m1*(l1^2/4)+m2*l1^2;
 
 [t,x] = ode45(@BacksteppingControl, tspan, x0);
 
-% q1_d = 90*pi/180 + (30*pi/180)*cos(t);
-% q1_dot_d = -(30*pi/180)*sin(t);
-% q1_ddot_d = -(30*pi/180)*cos(t);
-% q2_d = 90*pi/180 - (30*pi/180)*sin(t);
-% q2_dot_d = -(30*pi/180)*cos(t);
-% q2_ddot_d = (30*pi/180)*sin(t);
+q1_d = 90*pi/180 + (30*pi/180)*cos(t);
+q1_dot_d = -(30*pi/180)*sin(t);
+q1_ddot_d = -(30*pi/180)*cos(t);
+q2_d = 90*pi/180 - (30*pi/180)*sin(t);
+q2_dot_d = -(30*pi/180)*cos(t);
+q2_ddot_d = (30*pi/180)*sin(t);
 
 % Plots
-% figure(1);
-% clf;
-% 
-% subplot(2,1,1);
-% plot(t, x(:,1),'r-');
-% hold on;
-% plot(t, q1_d, 'b--');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$q_1 [rad]$','Interpreter','latex','FontSize',14);
-% grid on;
-% legend('$q_1$', '$q_{1_d}$','Interpreter','latex',Location='southeast');
-% 
-% subplot(2,1,2);
-% plot(t, x(:,3),'r-');
-% hold on;
-% plot(t, q1_dot_d, 'b--');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$\dot{q}_1 [rad/sec]$','Interpreter','latex','FontSize',14);
-% grid on;
-% legend('$\dot{q}_1$', '$\dot{q}_{1_d}$','Interpreter','latex',Location='southeast');
-% 
-% 
-% figure(2);
-% clf;
-% 
-% subplot(2,1,1);
-% plot(t, x(:,2),'r-');
-% hold on;
-% plot(t, q2_d, 'b--');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$q_2 [rad]$','Interpreter','latex','FontSize',14);
-% grid on;
-% legend('$q_2$', '$q_{2_d}$','Interpreter','latex',Location='southeast');
-% 
-% subplot(2,1,2);
-% plot(t, x(:,4),'r-');
-% hold on;
-% plot(t, q2_dot_d, 'b--');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$\dot{q}_2 [rad/sec]$','Interpreter','latex','FontSize',14);
-% grid on;
-% legend('$\dot{q}_2$', '$\dot{q}_{2_d}$','Interpreter','latex',Location='southeast');
-% 
-% figure(3);
-% clf;
-% 
-% subplot(4,1,1);
-% plot(t, x(:,1) - q1_d,'r-');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$e_{q_1} [rad]$','Interpreter','latex','FontSize',14);
-% grid on;
-% 
-% subplot(4,1,2);
-% plot(t, x(:,3) - q1_dot_d,'r-');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$\dot{e}_{q_1} [rad/sec]$','Interpreter','latex','FontSize',14);
-% grid on;
-% 
-% subplot(4,1,3);
-% plot(t, x(:,2) - q2_d,'r-');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$e_{q_2} [rad]$','Interpreter','latex','FontSize',14);
-% grid on;
-% 
-% subplot(4,1,4);
-% plot(t, x(:,4) - q2_dot_d,'r-');
-% xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
-% ylabel('$\dot{e}_{q_2} [rad/sec]$','Interpreter','latex','FontSize',14);
-% grid on;
+figure(1);
+clf;
+
+subplot(2,1,1);
+plot(t, x(:,1),'r-');
+hold on;
+plot(t, q1_d, 'b--');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$q_1 [rad]$','Interpreter','latex','FontSize',14);
+grid on;
+legend('$q_1$', '$q_{1_d}$','Interpreter','latex',Location='southeast');
+
+subplot(2,1,2);
+plot(t, x(:,3),'r-');
+hold on;
+plot(t, q1_dot_d, 'b--');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$\dot{q}_1 [rad/sec]$','Interpreter','latex','FontSize',14);
+grid on;
+legend('$\dot{q}_1$', '$\dot{q}_{1_d}$','Interpreter','latex',Location='southeast');
+
+
+figure(2);
+clf;
+
+subplot(2,1,1);
+plot(t, x(:,2),'r-');
+hold on;
+plot(t, q2_d, 'b--');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$q_2 [rad]$','Interpreter','latex','FontSize',14);
+grid on;
+legend('$q_2$', '$q_{2_d}$','Interpreter','latex',Location='southeast');
+
+subplot(2,1,2);
+plot(t, x(:,4),'r-');
+hold on;
+plot(t, q2_dot_d, 'b--');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$\dot{q}_2 [rad/sec]$','Interpreter','latex','FontSize',14);
+grid on;
+legend('$\dot{q}_2$', '$\dot{q}_{2_d}$','Interpreter','latex',Location='southeast');
+
+figure(3);
+clf;
+
+subplot(4,1,1);
+plot(t, x(:,1) - q1_d,'r-');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$e_{q_1} [rad]$','Interpreter','latex','FontSize',14);
+grid on;
+
+subplot(4,1,2);
+plot(t, x(:,3) - q1_dot_d,'r-');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$\dot{e}_{q_1} [rad/sec]$','Interpreter','latex','FontSize',14);
+grid on;
+
+subplot(4,1,3);
+plot(t, x(:,2) - q2_d,'r-');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$e_{q_2} [rad]$','Interpreter','latex','FontSize',14);
+grid on;
+
+subplot(4,1,4);
+plot(t, x(:,4) - q2_dot_d,'r-');
+xlabel('$time [sec]$','Interpreter','latex','FontSize',14);
+ylabel('$\dot{e}_{q_2} [rad/sec]$','Interpreter','latex','FontSize',14);
+grid on;
 
 % Simulation Adaptive Backstepping
 x01 = [x0; zeros(size(parvar))];

@@ -22,7 +22,7 @@ function dstate = AdaptiveBacksteppingControl(t, state)
     
     % Gain matrices
     K1 = [4 0;
-          0 3];
+          0 4];
     K2 = [8 0;
           0 12];
     Gp = 5*eye(7);
