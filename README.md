@@ -4,11 +4,22 @@ Assignments, Atomic Project and Semester Project for course DPMS_AS/2203 - Intel
 
 ## Atomic Semester Project
 
-The atomic project has subject about Positive real functions and stability of LTI feedback systems.
+The atomic project has subject about Positive Real Functions and Stability Analysis of LTI feedback systems.
 
 ## Team Semester Project
 
 The team project consists of the construction and intelligent control of a multiple water tank system.
+
+For the control of the system were applied six different algorithms:
+
+  1. MIT Rule Control.
+  2. Model Reference Adaptive Control.
+  3. Feedback Linearization Control.
+  4. Adaptive Feedback Linearization Control.
+  5. Backstepping Control.
+  6. Adaptive Backstepping Control.
+
+The first step was the construction of the system. The second step was implementing the above algorithms in MATLAB, in order to see the desired response of the system, as well the ideal parameter identification.The third and final step was to implement these algorithms on C++, in order to execute them in the real constructed system.
 
 ## Authors
 
