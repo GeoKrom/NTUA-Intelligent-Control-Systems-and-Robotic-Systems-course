@@ -408,7 +408,7 @@ elseif method == 6
 else
     
     disp(" ");
-    disp("You did not chose a specific controller");
+    disp("You did not choose a specific controller");
     disp(" ");
     disp("Usage: >>Control_Tank_System ");
     disp("Correct numbers for variable 'method' ");
