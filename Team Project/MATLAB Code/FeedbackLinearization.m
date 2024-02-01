@@ -1,16 +1,17 @@
-function dstate = FeedbackLinearizition(t, state)
+function dstate = FeedbackLinearization(t, state)
 %FEEDBACKLINEARIZITION Summary of this function goes here
 %   Detailed explanation goes here
 
     global theta_1
     global theta_2
     global b
+    global a2m
     
     h1 = state(1);
     h2 = state(2);
     
     % Input State Linearization
-    K1 = 10;
+    K1 = 1;
     K2 = 10;
     z1 = h2;
     z2 = theta_1*sqrt(h1) - theta_2*sqrt(h2);

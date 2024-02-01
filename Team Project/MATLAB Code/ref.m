@@ -8,13 +8,13 @@ function [h_2d,h_2d_dot,h_2d_Ddot] = ref(t)
 
     
     if ref_sig == 2
-        a = 1;
+        a = 1/60;
         h_2d = A*sin(a*t)+h_max/2;
         h_2d_dot = a*A*cos(a*t);
         h_2d_Ddot = -a^2*A*sin(a*t); 
     
     elseif ref_sig == 1
-        pauseTime = 30;
+        pauseTime = 4*120;
         NofPeriod = floor(t./pauseTime);
         h_2d = zeros(size(t));
         h_2d_dot = zeros(size(t));
@@ -39,7 +39,7 @@ function [h_2d,h_2d_dot,h_2d_Ddot] = ref(t)
     
     elseif ref_sig == 3 
         
-        PeriodTime = 30;
+        PeriodTime = 4*120;
         NofPeriod = floor(t./PeriodTime);
         b = PeriodTime/4;
         h_2d = zeros(size(t));

@@ -7,9 +7,16 @@ function dstate = MITRule(t, state)
     global u_e
     global a1m
     global a2m
-
+    global Am
+    global theta1_star
+    global theta2_star
+    global theta3_star
+    
     r = ref(t) - h_2e;
+    %r = h_2e/2; 
+    
     Am = [0 1; -a2m -a1m];
+    
     h_1 = state(1);
     h_2 = state(2);
     x_m = state(3:4);
@@ -19,18 +26,22 @@ function dstate = MITRule(t, state)
     filter1 = state(8:9);
     filter2 = state(10:11);
     filter3 = state(12:13);
+    
     x1 = h_1 - h_1e;
     x2 = h_2 - h_2e;
-    gamma_1 = 20000;
-    gamma_2 = 20000;
-    gamma_3 = 40000;
     
-    dxm = Am*x_m + [0;a2m]*r;
-    dfilter1 = Am*filter1 + [0;a2m]*r;
-    dfilter2 = Am*filter2 + [0;a2m]*x1;
+    gamma_1 = 500;
+    gamma_2 = 180;
+    gamma_3 = 150;
+    
+    dxm = Am*x_m + [0; a2m]*r;          
+    dfilter1 = Am*filter1 + [0;a2m]*r;  
+    dfilter2 = Am*filter2 + [0;a2m]*x1; 
     dfilter3 = Am*filter3 + [0;a2m]*x2;
+    
     u = theta1_est*r - theta2_est*x1 - theta3_est*x2;
-    plantdstate = plantDE(t, [h_1;h_2], u+u_e);
+    % u = theta1_star*r - theta2_star*x1 - theta3_star*x2;
+    plantdstate = plantDE(t, [h_1;h_2], u + u_e);
     
     
     e = x2 - x_m(1);
