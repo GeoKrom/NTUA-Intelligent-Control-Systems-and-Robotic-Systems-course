@@ -11,7 +11,7 @@ function dstate = MRAC(t, state)
     global theta_2
     global u_e
     global b
-
+    global h_max
 
     h1 = state(1);
     h2 = state(2);
@@ -28,11 +28,11 @@ function dstate = MRAC(t, state)
    
     % Adaptation Laws
     sigma = 0;
-    Gamma_x = 500*eye(2);
-    gamma_r = 100;
+    Gamma_x = 90000*eye(2);
+    gamma_r = 50000;
     gamma_theta = 0;
-    dKx = -Gamma_x*(x*e'*P*[0;1] + sigma*Kx_est);
-    dKr = -gamma_r*(r*e'*P*[0;1] + sigma*Kr_est);
+    dKx = -Gamma_x*(x*e'*P*[b;0] + sigma*Kx_est);
+    dKr = -gamma_r*(r*e'*P*[b;0] + sigma*Kr_est);
     dtheta = -gamma_theta*e'*P*[0;1];
     
     %Projection Operator
@@ -57,9 +57,14 @@ function dstate = MRAC(t, state)
         dKx(2) = 0;
     end
 
-    u = Kx_est'*x + Kr_est*r;
+    u_c = Kx_est'*x + Kr_est*r;
+    u = u_c + u_e;
+    % h_safe = 0.18;
+    % if h1 > h_safe
+    %     u = u - ((h1 - h_safe)/(h_max - h_safe))*u;
+    % end
 
-    plant = plantDE(t, [h1;h2], u + u_e);
+    plant = plantDE(t, [h1;h2], u);
 
     
     dstate = [plant; dxm; dKx; dKr; dtheta];

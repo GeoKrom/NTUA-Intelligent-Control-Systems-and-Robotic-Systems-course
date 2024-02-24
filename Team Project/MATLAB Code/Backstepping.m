@@ -9,8 +9,8 @@ function dstate = Backstepping(t, state)
 
     h1 = state(1);
     h2 = state(2);
-    K1 = sqrt(a2m);
-    K2 = 2*K1;
+    K1 = a2m;
+    K2 = 2*sqrt(a2m);
     [h2_d, h2_d_dot, h2_d_ddot] = ref(t);
 
     ksi1 = h2 - h2_d;
@@ -20,7 +20,11 @@ function dstate = Backstepping(t, state)
     
     beta = 2*sqrt(h1)/(b*theta_1);
     u = alpha*beta; 
-    
+    %u = u_c + u_e;
+    % h_safe = 0.18;
+    % if h1 >= h_safe
+    %     u = u - ((h1 - h_safe)/(h_max - h_safe))*u;
+    % end
     plant = plantDE(t, [h1;h2], u);
     
     dstate = plant;

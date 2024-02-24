@@ -51,7 +51,7 @@ theta_2 = a_2/A*sqrt(2*g);
 b = K_m/A;
 h_max = 10^(-3)/A;
 method = input("Please select your desired method: ");
-a2m = 0.05;
+a2m = .01;
 a1m = 2*sqrt(a2m);
 
 % Extra Parameters
@@ -67,7 +67,7 @@ u_e = (theta_1/b)*sqrt(h_1e);
 omega_1 = (a_1/A)*(g/(sqrt(2*g*h_1e)));
 omega_2 = (a_2/A)*(g/(sqrt(2*g*h_2e)));
 
-ref_sig = 33;
+ref_sig = 1;
 minutes = 60;
 tspan = [0 minutes*60];
 % opt = odeset('Events',@overflow,'RelTol',1e-11,'AbsTol',1e-9);
@@ -169,9 +169,6 @@ elseif method == 2
     h0 = zeros(n,1);
     h0(1) = h_1e;
     h0(2) = h_2e;
-    h0(5) = -20;
-    h0(6) = -200;
-    h0(7) = 15;
     [t,y] = ode23(@MRAC, tspan, h0, opt);
     
     Kr_star = (a2m/b);
@@ -206,7 +203,7 @@ elseif method == 2
     subplot(3,1,1);
     plot(t, y(:,5),'r-');
     hold on;
-    yline(Kx_star1, 'b--');
+    % yline(Kx_star1, 'b--');
     xlim(tspan);
     xlabel('$time [sec]$','Interpreter','latex');
     ylabel('$K_{x_1}$','Interpreter','latex');
@@ -217,7 +214,7 @@ elseif method == 2
     subplot(3,1,2);
     plot(t,y(:,6),'r-');
     hold on;
-    yline(Kx_star2, 'b--');
+    % yline(Kx_star2, 'b--');
     xlim(tspan);
     xlabel('$time [sec]$','Interpreter','latex');
     ylabel('$K_{x_2}$','Interpreter','latex');
@@ -228,7 +225,7 @@ elseif method == 2
     subplot(3,1,3);
     plot(t,y(:,7),'r-');
     hold on;
-    yline(Kr_star, 'b--');
+    % yline(Kr_star, 'b--');
     xlim(tspan);
     xlabel('$time [sec]$','Interpreter','latex');
     ylabel('$K_r$','Interpreter','latex');
@@ -369,7 +366,7 @@ elseif method == 5
     h0(1) = h_1e;
     h0(2) = h_2e;
 
-    [t,y] = ode23(@FeedbackLinearization, tspan, h0, opt);
+    [t,y] = ode23(@Backstepping, tspan, h0, opt);
 
 
     % Plots

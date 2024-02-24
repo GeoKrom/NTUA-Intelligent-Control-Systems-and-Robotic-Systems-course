@@ -1,8 +1,9 @@
 function dstate = AdaptiveBackstepping(t, state)
     % ADAPTIVEBACKSTEPPING Summary of this function goes here
     %   Detailed explanation goes here
-    
+    global h_max
     global a2m
+    global a1m
     global b
     
     h1 = state(1);
@@ -11,8 +12,8 @@ function dstate = AdaptiveBackstepping(t, state)
     theta2_hat = state(4);
     b_est = state(5);
 
-    K1 = sqrt(a2m);
-    K2 = 2*K1;
+    K1 = a2m;
+    K2 = a1m;
     [h2_d, h2_d_dot, h2_d_ddot] = ref(t);
     
     % Diffeomorphism Transformation
@@ -24,9 +25,9 @@ function dstate = AdaptiveBackstepping(t, state)
     beta2 = -K1*sqrt(h2) + 0.5*theta2_hat;
    
     % Adaptation Laws
-    gamma1 = 0.001;
-    gamma2 = 0.001;
-    gamma3 = 0.001;
+    gamma1 = 0.000005205;
+    gamma2 = 0.000002205;
+    gamma3 = 0.000001205;
     dtheta1 = gamma1*(ksi1*sqrt(h1) + ksi2*beta1);
     dtheta2 = gamma2*(-ksi1*sqrt(h2) + ksi2*beta2);
     
@@ -43,7 +44,11 @@ function dstate = AdaptiveBackstepping(t, state)
     alpha = -ksi1 - alpha2 - dtheta1*sqrt(h1) + dtheta2*sqrt(h2) - K2*ksi2;
     beta = 2*sqrt(h1)/(b_est*theta1_hat);
     u = alpha*beta;
-    
+        % u = u_c + u_e;
+    % h_safe = 0.18;
+    % if h1 > h_safe
+    %     u = u - ((h1 - h_safe)/(h_max - h_safe))*u;
+    % end
     beta3 = theta1_hat*(1/(2*sqrt(h2)))*u;
     dbeta = gamma3*ksi2*beta3;
     
