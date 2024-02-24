@@ -40,7 +40,7 @@ const int MOTOR1_PIN2 = 3;
 // Define Adaptive Feedback Linearization Controller Parameters
 #define gamma1 0.00035
 #define gamma2 0.00025
-#define gamma3 0.0055
+#define gamma3 0.00055
 #define dt 0.01 // in [sec]
 
 const float theta1 = ((a1 / A) * sqrt(2 * g));
@@ -48,18 +48,23 @@ const float theta2 = ((a2 / A) * sqrt(2 * g));
 const float b = Km / A;
 //const float h_max = pow(10, -3) / A;
 const float h_max = 0.06;
-const float h1_e = h_max / 2;
+const float h1_e = h_max / 4;
 const float h2_e = pow(theta2 / theta1, 2) * h1_e;
 const float u_e = (theta1 / b) * sqrt(h1_e);
-const float a2m = 0.05;
+const float a2m = 4;
 const float a1m = 2 * sqrt(a2m);
 const float K1 = a2m;
 const float K2 = 2*sqrt(a2m);
 const int system_state_len = 7;
 float system_state[] = {0, 0, 0, 0, 0, 0, 0};
-
+float h1_prev = 0.0;
+float h2_prev = 0.0;
+float h1_cur = 0.0;
+float h2_cur = 0.0;
+float delta_const = 0.005;
 // Global Variable
 bool enabled = false;
+char userInput;
 
 void setup() {
   Serial.begin(9600);
@@ -89,38 +94,74 @@ void setup() {
   system_state[3] = 0;
   system_state[4] = 0.0105;
   system_state[5] = 0.0105;
-  system_state[6] = 0.0002;
+  system_state[6] = 0.002;
 
 }
 
 void loop() {
-
+  if(Serial.available()> 0){ 
+        // Serial.print('1');
+        userInput = Serial.read();     
+        if(userInput == 'g'){  
+    
  if (!enabled) {
     initialization();
   }
   // Control Loop
   if (enabled) {
+    h1_prev = system_state[0];
+    h2_prev = system_state[1];
     readTopLoadCellMeasurement();
     readBotLoadCellMeasurement();
-    float pump_value = adaptiveFeedbackLinearization();
+    h1_cur = system_state[0];
+    h2_cur = system_state[1];
+    if(abs(h1_cur - h1_prev)>delta_const){system_state[0] = h1_prev;}
+    if(abs(h2_cur - h2_prev)>delta_const){system_state[1] = h2_prev;}
+    int pump_value = adaptiveFeedbackLinearization();
     // Transform to [V]
-    int volt_pump_value =
-        map(pump_value, V_LOW, V_HIGH, V_BINARY_LOW, V_BINARY_HIGH);
-    sendPump(volt_pump_value);
+    if (pump_value<V_LOW){pump_value=V_LOW;}
+    else if (pump_value>V_HIGH){pump_value=V_HIGH-1;}
+    
+    float volt_pump_value =
+        floatMap(pump_value, V_LOW, V_HIGH, V_BINARY_LOW, V_BINARY_HIGH);
+
+
+
+    // if (volt_pump_value<V_BINARY_LOW){volt_pump_value = V_BINARY_LOW;}
+    // else if (volt_pump_value>V_BINARY_HIGH){volt_pump_value = V_BINARY_HIGH-20;}
+    
+    sendPump(floor(volt_pump_value));
     delay(dt * 1000);
+    Serial.print(system_state[1]*1000);
+    Serial.print(",");
+    Serial.print(system_state[2]*1000);
+    Serial.print(",");
+    Serial.print(millis());
+    Serial.print(",");
+    Serial.print("volt");
+    Serial.print(",");
+    Serial.print(volt_pump_value);
+    Serial.print(",");
+      }
+    }
+        else if (userInput == 'c'){
+      sendPump(0);
+    }
   }
 }
-
 void initialization() {
 
   float h1 = 0;
   float h2 = 0;
   sendPump(90); // MAX 255 
-  // while (h1 < h1_e || h2 < h2_e) {
-  while (true){
+  while (h1 < h1_e || h2 < h2_e) {
+  // while (true){
     h1 = readTopLoadCellMeasurement();
     h2 = readBotLoadCellMeasurement();
+    
   }
+  system_state[0] = h1;
+  system_state[1] = h2;
   enabled = true;
   Serial.println("Target Reached");
 
@@ -131,9 +172,10 @@ void initialization() {
 
 float adaptiveFeedbackLinearization() {
 
-  float r = ref() - h2_e;
+
+  float r = ref();
   BLA::Matrix<2, 2> Am = {0, 1, -K1, -K2};
-  BLA::Matrix<2, 1> Bm = {0, b};
+  BLA::Matrix<2, 1> Bm = {0, K1};
   BLA::Matrix<2, 2> P = {5.6461, 10, 10, 23.4787};
   // Decompose state variables
   float h1 = system_state[0];
@@ -150,7 +192,7 @@ float adaptiveFeedbackLinearization() {
 
   BLA::Matrix<2,1> x_m = {xm, xm_dot};
   BLA::Matrix<2,1> dxm = Am * x_m + Bm * r;
-  BLA::Matrix<2,1> e = {z1 - ref(), z2 - 0};
+  BLA::Matrix<2,1> e = {z1 - xm, z2 - xm_dot};
   float v = 0 - K1*e(0) - K2*e(1);
   BLA::Matrix<1,2> trH1 = {sqrt(h1), -0.5*theta1_est - 0.5*theta2_est*sqrt(h1/h2)};
   BLA::Matrix<1,2> trH2 = {-sqrt(h2), 0.5*theta2_est};
@@ -161,11 +203,11 @@ float adaptiveFeedbackLinearization() {
   float dtheta2 = gamma2*H2(0);
 
 
-  if(theta1_est <= 0.00001 && dtheta1 < 0){
+  if(theta1_est <= 0.001 && dtheta1 < 0){
     dtheta1 = 0;
   }
 
-  if(theta2_est <= 0.00001 && dtheta2 < 0){
+  if(theta2_est <= 0.001 && dtheta2 < 0){
     dtheta2 = 0;
   }
 
@@ -180,7 +222,7 @@ float adaptiveFeedbackLinearization() {
   BLA::Matrix<1, 1> H3 = trH3*P*e;
   float dbeta = gamma3*H3(0);
 
-  if (b_est <= 0.00001 && dbeta < 0){
+  if (b_est <= 0.001 && dbeta < 0){
     dbeta = 0;
   }
 
@@ -193,11 +235,44 @@ float adaptiveFeedbackLinearization() {
   system_state[4] = theta1_est + dtheta1 * dt;
   system_state[5] = theta2_est + dtheta2 * dt;
   system_state[6] = b_est + dbeta * dt;
+  
+  Serial.print("law");
+  Serial.print(",");  
+  Serial.print(u);
+  Serial.print(","); 
+  Serial.print("error");
+  Serial.print(",");
+  Serial.print(e(0)*1000);
+  Serial.print(",");
+  Serial.print(e(1)*1000);
+  Serial.print(",");
+  Serial.print("state param: ");
+  Serial.print(",");
+  Serial.print(system_state[0]*1000);
+  Serial.print(",");
+  Serial.print(system_state[1]*1000);
+  Serial.print(",");
+  // Serial.print(system_state[2]*1000);
+  // Serial.print(",");
+  // Serial.print(system_state[3]*1000);
+  // Serial.print(",");
+  Serial.print(system_state[4]*1000000);
+  Serial.print(",");
+  Serial.print(system_state[5]*1000000);
+  Serial.print(",");
+  Serial.print(system_state[6]*1000000);
+  Serial.print(",");
+  Serial.print(dtheta1*1000000);
+  Serial.print(",");
+  Serial.print(dtheta2*1000000);
+  Serial.print(",");
+  Serial.println(dbeta*1000000);
 
-  return u;
+
+  return floor(u);
 }
 
-double ref() { return h_max/2; }
+double ref() { return h_max/3; }
 
 // *==== SENSOR FUNCTIONS ====*
 
@@ -206,7 +281,7 @@ float readTopLoadCellMeasurement() {
   float top_load_cell_measurement = scale_top.get_units(1)/1000; // in [Kg]
   float h1 = top_load_cell_measurement / (A * rho);  // in [m]
   system_state[0] = h1;
-
+  
   return h1;
 }
 
@@ -214,11 +289,16 @@ float readBotLoadCellMeasurement() {
   // Read from bot load cell
   float bot_load_cell_measurement = scale_bot.get_units(1)/1000; // in [Kg]  
   float h2 = bot_load_cell_measurement / (A * rho); // in [m]
+  
   system_state[1] = h2;
-
+  
   // TODO: Print height 
 
   return h2;
 }
 
 void sendPump(int value) { analogWrite(ENA, value); }
+
+float floatMap(float x, float inMin, float inMax, float outMin, float outMax){
+  return (x-inMin)*(outMax-outMin)/(inMax-inMin)+outMin;
+}
