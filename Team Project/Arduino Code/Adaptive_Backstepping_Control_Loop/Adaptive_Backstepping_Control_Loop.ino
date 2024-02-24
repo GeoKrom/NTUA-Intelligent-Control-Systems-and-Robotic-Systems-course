@@ -38,9 +38,9 @@ const int MOTOR1_PIN2 = 3;
 #define rho 1*pow(10,3) // [kg/m^2]
 
 // Define Adaptive Backstepping Controller Parameters
-#define gamma1 0.000025
-#define gamma2 0.000035
-#define gamma3 0.55
+#define gamma1 0.0025
+#define gamma2 0.0035
+#define gamma3 0.055
 #define dt 0.01 // in [sec]
 
 const float theta1 = ((a1 / A) * sqrt(2 * g));
@@ -48,7 +48,7 @@ const float theta2 = ((a2 / A) * sqrt(2 * g));
 const float b = Km / A;
 //const float h_max = pow(10, -3) / A;
 const float h_max = 0.06;
-const float h1_e = h_max / 2;
+const float h1_e = h_max / 3;
 const float h2_e = pow(theta2 / theta1, 2) * h1_e;
 const float u_e = (theta1 / b) * sqrt(h1_e);
 const float a2m = 0.05;
@@ -60,6 +60,7 @@ float system_state[] = {0, 0, 0, 0, 0};
 
 // Global Variable
 bool enabled = false;
+char userInput;
 
 void setup() {
   Serial.begin(9600);
@@ -92,6 +93,10 @@ void setup() {
 }
 
 void loop() {
+if(Serial.available()> 0){ 
+      // Serial.print('1');
+      userInput = Serial.read();     
+      if(userInput == 'g'){  
 
  if (!enabled) {
     initialization();
@@ -102,10 +107,32 @@ void loop() {
     readBotLoadCellMeasurement();
     float pump_value = adaptiveBackstepping();
     // Transform to [V]
+    //Saturating Input to 0-5[v]
+    if(pump_value<0){pump_value = 0;}
+    if(pump_value>5){pump_value = 4;}
+    
     int volt_pump_value =
-        map(pump_value, V_LOW, V_HIGH, V_BINARY_LOW, V_BINARY_HIGH);
-    sendPump(volt_pump_value);
+        floatMap(pump_value, V_LOW, V_HIGH, V_BINARY_LOW, V_BINARY_HIGH);
+
+    sendPump(floor(volt_pump_value));
     delay(dt * 1000);
+    float refer = ref();
+    Serial.print(refer*1000);
+    Serial.print(",");
+    Serial.print(system_state[1]*1000);
+    Serial.print(",");
+    Serial.print(millis());
+    Serial.print(",");
+    Serial.print("volt");
+    Serial.print(",");
+    Serial.print(volt_pump_value);
+    Serial.print(",");
+
+      }
+    }
+        else if (userInput == 'c'){
+      sendPump(0);
+    }
   }
 }
 
@@ -114,11 +141,14 @@ void initialization() {
   float h1 = 0;
   float h2 = 0;
   sendPump(90); // MAX 255 
-  // while (h1 < h1_e || h2 < h2_e) {
-  while (true){
+  while (h1 < h1_e || h2 < h2_e) {
+  // while (true){
     h1 = readTopLoadCellMeasurement();
     h2 = readBotLoadCellMeasurement();
   }
+  system_state[0] = h1;
+  system_state[1] = h2;
+
   enabled = true;
   Serial.println("Target Reached");
 
@@ -129,7 +159,7 @@ void initialization() {
 
 float adaptiveBackstepping() {
 
-  float r = ref() - h2_e;
+    float r = ref();
   BLA::Matrix<2, 2> Am = {0, 1, -K1, -K2};
   BLA::Matrix<2, 1> Bm = {0, b};
   BLA::Matrix<2, 2> P = {5.6461, 10, 10, 23.4787};
@@ -152,11 +182,11 @@ float adaptiveBackstepping() {
   float dtheta2 = gamma2*(-ksi1*sqrt(h2) + ksi2*beta2);
 
 
-  if(theta1_est <= 0.00001 && dtheta1 < 0){
+  if(theta1_est <= 0.0001 && dtheta1 < 0){
     dtheta1 = 0;
   }
 
-  if(theta2_est <= 0.00001 && dtheta2 < 0){
+  if(theta2_est <= 0.0001 && dtheta2 < 0){
     dtheta2 = 0;
   }
 
@@ -168,7 +198,7 @@ float adaptiveBackstepping() {
   float beta3 = theta1_est*(1/(2*sqrt(h2)))*u;
   float dbeta = gamma3*ksi2*beta3;
 
-  if (b_est <= 0.00001 && dbeta < 0){
+  if (b_est <= 0.0001 && dbeta < 0){
     dbeta = 0;
   }
 
@@ -180,7 +210,36 @@ float adaptiveBackstepping() {
   system_state[3] = theta2_est + dtheta2 * dt;
   system_state[4] = b_est + dbeta * dt;
 
-  return u;
+  Serial.print("law");
+  Serial.print(",");  
+  Serial.print(u);
+  Serial.print(","); 
+  Serial.print("error");
+  Serial.print(",");
+  Serial.print(ksi1*1000);
+  Serial.print(",");
+  Serial.print(ksi2*1000);
+  Serial.print(",");
+  Serial.print("state param: ");
+  Serial.print(",");
+  // Serial.print(system_state[0]*1000);
+  // Serial.print(",");
+  // Serial.print(system_state[1]*1000);
+  // Serial.print(",");
+  Serial.print(system_state[2]*1000);
+  Serial.print(",");
+  Serial.print(system_state[3]*1000);
+  Serial.print(",");
+  Serial.print(system_state[4]*1000);
+  Serial.print(",");
+  Serial.print(dtheta1*1000000);
+  Serial.print(",");
+  Serial.print(dtheta2*1000000);
+  Serial.print(",");
+  Serial.println(dbeta*1000000);
+
+
+  return floor(u);
 }
 
 double ref() { return h_max/2; }
@@ -208,3 +267,7 @@ float readBotLoadCellMeasurement() {
 }
 
 void sendPump(int value) { analogWrite(ENA, value); }
+
+float floatMap(float x, float inMin, float inMax, float outMin, float outMax){
+  return (x-inMin)*(outMax-outMin)/(inMax-inMin)+outMin;
+}
